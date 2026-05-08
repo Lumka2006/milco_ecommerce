@@ -5,10 +5,35 @@
     <link rel="stylesheet" href="/css/style.css">
     <script>
         let productsCache = [];
+
+        async function readJsonResponse(response) {
+            const contentType = response.headers.get('content-type') || '';
+            const data = contentType.includes('application/json')
+                ? await response.json()
+                : { success: false, message: await response.text() };
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Request failed');
+            }
+
+            return data;
+        }
+
         async function loadData() {
-            const products = await fetch('https://milco-backend.onrender.com/admin/api/products', { credentials: 'include' }).then(r => r.json());
-            const orders = await fetch('https://milco-backend.onrender.com/admin/api/orders', { credentials: 'include' }).then(r => r.json());
-            const notif = await fetch('https://milco-backend.onrender.com/admin/api/notifications', { credentials: 'include' }).then(r => r.json());
+            let products;
+            let orders;
+            let notif;
+
+            try {
+                products = await fetch('https://milco-backend.onrender.com/admin/api/products', { credentials: 'include' }).then(readJsonResponse);
+                orders = await fetch('https://milco-backend.onrender.com/admin/api/orders', { credentials: 'include' }).then(readJsonResponse);
+                notif = await fetch('https://milco-backend.onrender.com/admin/api/notifications', { credentials: 'include' }).then(readJsonResponse);
+            } catch (err) {
+                alert(err.message || 'Please log in as admin first.');
+                window.location.href = 'https://milco-backend.onrender.com/admin/login';
+                return;
+            }
+
             productsCache = products;
 
             document.getElementById('productCount').innerText = products.length;
@@ -49,10 +74,11 @@
 
         async function deleteProduct(id) {
             if (confirm('Delete product?')) {
-                await fetch(`https://milco-backend.onrender.com/admin/api/products/${id}`, {
+                const response = await fetch(`https://milco-backend.onrender.com/admin/api/products/${id}`, {
                     method: 'DELETE',
                     credentials: 'include'
                 });
+                await readJsonResponse(response);
                 loadData();
             }
         }
@@ -74,11 +100,12 @@
             formData.append('description', product.description || '');
             formData.append('isNewProduct', String(isNewProduct));
 
-            await fetch(`https://milco-backend.onrender.com/admin/api/products/${product._id}`, {
+            const response = await fetch(`https://milco-backend.onrender.com/admin/api/products/${product._id}`, {
                 method: 'PUT',
                 body: formData,
                 credentials: 'include'
             });
+            await readJsonResponse(response);
             loadData();
         }
 
@@ -91,15 +118,20 @@
                 return;
             }
 
-            await fetch('https://milco-backend.onrender.com/admin/api/products', {
-                method: 'POST',
-                body: new FormData(form),
-                credentials: 'include'
-            });
+            try {
+                const response = await fetch('https://milco-backend.onrender.com/admin/api/products', {
+                    method: 'POST',
+                    body: new FormData(form),
+                    credentials: 'include'
+                });
+                await readJsonResponse(response);
 
-            form.reset();
-            alert('Product saved successfully.');
-            loadData();
+                form.reset();
+                alert('Product saved successfully.');
+                loadData();
+            } catch (err) {
+                alert(err.message || 'Product could not be saved. Please log in and try again.');
+            }
         }
 
         window.onload = loadData;

@@ -452,11 +452,6 @@ header {
     animation: counterPopPremium 0.4s ease;
 }
 
-.disabled-link {
-    opacity: 0.55;
-    cursor: not-allowed;
-}
-
 @keyframes counterPopPremium {
     0% { transform: scale(0); opacity: 0; }
     80% { transform: scale(1.2); }

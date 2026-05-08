@@ -52,34 +52,40 @@ router.get('/api/products', auth, async (req, res) => {
 });
 
 router.post('/api/products', auth, upload.single('image'), async (req, res) => {
-  const { name, price, stock, category, description, isNew } = req.body;
-  const imageUrl = req.file ? `/uploads/${req.file.filename}` : '';
-  const isNewProduct = isNew === 'on' || isNew === 'true' || isNew === true;
-  const product = new Product({ name, price, stock, category, description, imageUrl, isNewProduct });
-  await product.save();
+  try {
+    const { name, price, stock, category, description, isNew } = req.body;
+    const imageUrl = req.file ? `/uploads/${req.file.filename}` : '';
+    const isNewProduct = isNew === 'on' || isNew === 'true' || isNew === true;
+    const product = new Product({ name, price, stock, category, description, imageUrl, isNewProduct });
+    await product.save();
 
-  // If product is marked new, send email to all subscribers
-  if (product.isNewProduct) {
-    try {
-      const subscribers = await Subscriber.find();
-      const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
-      });
-
-      for (let sub of subscribers) {
-        await transporter.sendMail({
-          from: process.env.EMAIL_USER,
-          to: sub.email,
-          subject: `New Product: ${product.name}`,
-          html: `<h3>New product matches your interest!</h3><p>${product.name} - M${product.price}</p><a href="http://localhost:3000/newproducts">View now</a>`
+    // If product is marked new, send email to all subscribers
+    if (product.isNewProduct) {
+      try {
+        const subscribers = await Subscriber.find();
+        const transporter = nodemailer.createTransport({
+          service: 'gmail',
+          auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
         });
+
+        for (let sub of subscribers) {
+          await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to: sub.email,
+            subject: `New Product: ${product.name}`,
+            html: `<h3>New product matches your interest!</h3><p>${product.name} - M${product.price}</p><a href="http://localhost:3000/newproducts">View now</a>`
+          });
+        }
+      } catch (err) {
+        console.error('New product notification failed:', err.message);
       }
-    } catch (err) {
-      console.error('New product notification failed:', err.message);
     }
+
+    res.json({ success: true, product });
+  } catch (err) {
+    console.error('Add product failed:', err);
+    res.status(500).json({ success: false, message: err.message || 'Failed to add product' });
   }
-  res.json({ success: true });
 });
 
 router.put('/api/products/:id', auth, upload.single('image'), async (req, res) => {
