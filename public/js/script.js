@@ -1,5 +1,7 @@
 // public/js/script.js
 
+const BACKEND_URL = 'https://milco-backend.onrender.com';
+
 // ==============================
 // CART MANAGEMENT
 // ==============================
@@ -12,6 +14,22 @@ let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
 function formatCurrency(amount) {
     return 'M' + Number(amount).toFixed(2);
+}
+
+function getProductImageUrl(imageUrl) {
+    if (!imageUrl) {
+        return '/images/default-product.jpg';
+    }
+
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+        return imageUrl;
+    }
+
+    if (imageUrl.startsWith('/uploads/')) {
+        return `${BACKEND_URL}${imageUrl}`;
+    }
+
+    return imageUrl;
 }
 
 // ==============================
@@ -154,9 +172,10 @@ function renderProductGrid(products) {
         <div class="card">
 
             <img 
-                src="${product.imageUrl || '/images/default-product.jpg'}" 
+                src="${getProductImageUrl(product.imageUrl)}" 
                 alt="${product.name}"
                 class="product-image"
+                onerror="this.onerror=null;this.src='/images/default-product.jpg';"
             >
 
             <h3>${product.name}</h3>
@@ -451,8 +470,9 @@ async function loadRecommendations(email) {
                 <div class="card">
 
                     <img 
-                        src="${product.imageUrl || '/images/default-product.jpg'}"
+                        src="${getProductImageUrl(product.imageUrl)}"
                         alt="${product.name}"
+                        onerror="this.onerror=null;this.src='/images/default-product.jpg';"
                     >
 
                     <h4>${product.name}</h4>
