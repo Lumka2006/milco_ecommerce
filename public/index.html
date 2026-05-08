@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MILCO Lesotho | Home</title>
+    <meta name="description" content="MILCO – Made In Lesotho Cooperative. Authentic local products: honey, peanut butter, crafts, skincare.">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header>
+    <div class="brand">
+        <img src="/images/milco.logo.jpeg" alt="MILCO logo" class="logo">
+        <h1 class="logo-text">ilco</h1>
+    </div>
+    <h1>Welcome to MILCO Lesotho</h1>
+    <p>Made In Lesotho Cooperative - Supporting Local Products</p>
+    <nav>
+        <a href="/">Home</a> |
+        <a href="/products">Products</a> |
+        <a href="/newproducts">New Products</a> |
+        <a href="/stakeholders">Stakeholders</a> |
+        <a href="/contact">Contact</a>
+    </nav>
+    <hr>
+</header>
+
+<!-- Moving banner -->
+<section class="banner">
+    <div class="banner-content">
+        <h2>🔥 New Products Have Arrived!</h2>
+        <p>Discover exciting Made in Lesotho products and subscribe for updates.</p>
+        <a href="/newproducts" class="btn">Click Here to View New Products →</a>
+    </div>
+    <div class="banner-ticker" aria-label="MILCO highlights">
+        <div class="banner-track">
+            <span>New local products arriving weekly</span>
+            <span>Made in Lesotho, delivered from MILCO</span>
+            <span>Support local farmers, artisans, and entrepreneurs</span>
+            <span>Shop honey, peanut butter, crafts, skincare, and more</span>
+            <span>New local products arriving weekly</span>
+            <span>Made in Lesotho, delivered from MILCO</span>
+        </div>
+    </div>
+</section>
+
+<section>
+    <h2>About MILCO</h2>
+    <p>MILCO (Made In Lesotho Cooperative) is a supermarket and retail store based at Sefika Complex, Maseru. We sell only products manufactured in Lesotho.</p>
+    <p>Our goal is to help local farmers, artisans, and entrepreneurs reach customers through physical and online shopping platforms.</p>
+</section>
+
+<section>
+    <h2>🔥 New Arrivals</h2>
+    <div id="featured-products" class="product-grid">Loading...</div>
+</section>
+
+<section>
+    <h2>🛒 You may also like (based on your last purchase)</h2>
+    <div id="recommendations" class="product-grid"></div>
+</section>
+
+<footer>
+    <p><b>MILCO Lesotho</b> | Sefika Complex, Maseru | Contact: +266 5892 1648</p>
+    <p>2026 MILCO Lesotho. All rights reserved.</p>
+</footer>
+
+<script src="/js/script.js"></script>
+<script>
+    // Load featured products
+    fetch('/api/products')
+        .then(res => res.json())
+        .then(products => {
+            const featured = products.slice(0, 4);
+            const container = document.getElementById('featured-products');
+            container.innerHTML = renderProductGrid(featured);
+            attachCartButtons();
+        });
+    // Load recommendations if user has purchased before (from localStorage email)
+    const lastCustomerEmail = localStorage.getItem('lastCustomerEmail');
+    if (lastCustomerEmail) {
+        fetch('/api/recommendations', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: lastCustomerEmail })
+        })
+        .then(res => res.json())
+        .then(recs => {
+            const recContainer = document.getElementById('recommendations');
+            recContainer.innerHTML = renderProductGrid(recs);
+            attachCartButtons();
+        });
+    }
+</script>
+</body>
+</html>

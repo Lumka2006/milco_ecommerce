@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script>
+        let productsCache = [];
+
+        async function loadData() {
+            const products = await fetch('/admin/api/products').then(r => r.json());
+            const orders = await fetch('/admin/api/orders').then(r => r.json());
+            const notif = await fetch('/admin/api/notifications').then(r => r.json());
+            productsCache = products;
+
+            document.getElementById('productCount').innerText = products.length;
+            document.getElementById('orderCount').innerText = orders.length;
+            document.getElementById('newOrders').innerText = notif.newOrders;
+            document.getElementById('lowStock').innerText = notif.lowStock;
+
+            let productHtml = '<table><tr><th>Name</th><th>Price</th><th>Stock</th><th>New</th><th>Actions</th></tr>';
+            products.forEach(p => {
+                productHtml += `<tr>
+                    <td>${p.name}</td><td>M${p.price}</td><td>${p.stock}</td>
+                    <td>${p.isNewProduct ? 'Yes' : 'No'}</td>
+                    <td>
+                        <button onclick="toggleNewProduct('${p._id}', ${!p.isNewProduct})">
+                            ${p.isNewProduct ? 'Unmark New' : 'Mark New'}
+                        </button>
+                        <button onclick="deleteProduct('${p._id}')">Delete</button>
+                    </td>
+                </tr>`;
+            });
+            productHtml += '</table>';
+            document.getElementById('productList').innerHTML = productHtml;
+
+            let orderHtml = '<table><tr><th>Customer</th><th>Phone</th><th>Location</th><th>Payment</th><th>Total</th><th>Date</th></tr>';
+            orders.forEach(o => {
+                orderHtml += `<tr>
+                    <td>${o.customer.name}</td>
+                    <td>${o.customer.phone || ''}</td>
+                    <td>${o.customer.location || ''}</td>
+                    <td>${o.paymentMethod || ''}</td>
+                    <td>M${o.total}</td>
+                    <td>${new Date(o.createdAt).toLocaleString()}</td>
+                </tr>`;
+            });
+            orderHtml += '</table>';
+            document.getElementById('orderList').innerHTML = orderHtml;
+        }
+
+        async function deleteProduct(id) {
+            if (confirm('Delete product?')) {
+                await fetch(`/admin/api/products/${id}`, { method: 'DELETE' });
+                loadData();
+            }
+        }
+
+        async function toggleNewProduct(id, isNewProduct) {
+            const product = productsCache.find(p => p._id === id);
+            if (!product) return;
+
+            const formData = new FormData();
+            formData.append('name', product.name);
+            formData.append('price', product.price);
+            formData.append('stock', product.stock);
+            formData.append('category', product.category);
+            formData.append('description', product.description || '');
+            formData.append('isNewProduct', String(isNewProduct));
+
+            await fetch(`/admin/api/products/${product._id}`, {
+                method: 'PUT',
+                body: formData
+            });
+            loadData();
+        }
+
+        async function addProduct(event) {
+            event.preventDefault();
+            const form = event.target;
+
+            await fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form)
+            });
+
+            form.reset();
+            loadData();
+        }
+
+        window.onload = loadData;
+    </script>
+</head>
+<body>
+    <h1>Admin Dashboard</h1>
+    <nav><a href="/admin/logout">Logout</a></nav>
+    <div>
+        <h2>Overview</h2>
+        <p>Products: <span id="productCount"></span></p>
+        <p>Orders: <span id="orderCount"></span></p>
+        <p>New orders (24h): <span id="newOrders"></span></p>
+        <p>Low stock items: <span id="lowStock"></span></p>
+    </div>
+    <div>
+        <h2>Products</h2>
+        <div id="productList"></div>
+        <h3>Add Product</h3>
+        <form action="/admin/api/products" method="POST" enctype="multipart/form-data" onsubmit="addProduct(event)">
+            <input name="name" placeholder="Name" required><br>
+            <input name="price" type="number" placeholder="Price" required><br>
+            <input name="stock" type="number" placeholder="Stock" required><br>
+            <input name="category" placeholder="Category" required><br>
+            <textarea name="description" placeholder="Description"></textarea><br>
+            <input type="file" name="image"><br>
+            <label><input type="checkbox" name="isNew"> Mark as New Product</label><br>
+            <button type="submit">Add Product</button>
+        </form>
+    </div>
+    <div>
+        <h2>Orders</h2>
+        <div id="orderList"></div>
+    </div>
+</body>
+</html>

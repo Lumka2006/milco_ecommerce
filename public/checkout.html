@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - MILCO</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header>
+    <h1>Checkout</h1>
+    <nav><a href="/cart">← Back to Cart</a></nav>
+</header>
+
+<section>
+    <h2>Your Details</h2>
+    <form id="checkoutForm">
+        <label>Full Name:</label><br>
+        <input type="text" id="custName" required><br>
+        <label>Email:</label><br>
+        <input type="email" id="custEmail" required><br>
+        <label>Phone (+266):</label><br>
+        <input type="tel" id="custPhone" required><br>
+        <label>Location / Delivery Address:</label><br>
+        <textarea id="custLocation" rows="4" placeholder="Write your village, town, street, or delivery directions" required></textarea><br>
+        <label>Payment Method:</label><br>
+        <select id="paymentMethod" required>
+            <option value="">Choose payment method</option>
+            <option value="Cash on Delivery">Cash on Delivery</option>
+            <option value="Mobile Money">Mobile Money</option>
+            <option value="Card Payment">Card Payment</option>
+            <option value="Bank Transfer">Bank Transfer</option>
+        </select><br><br>
+        <button type="submit" class="btn">Place Order</button>
+    </form>
+</section>
+
+<section>
+    <h2>🛒 You may also like</h2>
+    <div id="recommendations" class="product-grid"></div>
+</section>
+
+<script src="/js/script.js"></script>
+<script>
+    document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('custName').value;
+        const email = document.getElementById('custEmail').value;
+        const phone = document.getElementById('custPhone').value;
+        const location = document.getElementById('custLocation').value;
+        const paymentMethod = document.getElementById('paymentMethod').value;
+        const success = await checkout(name, email, phone, location, paymentMethod);
+        if (success) {
+            localStorage.setItem('lastCustomerEmail', email);
+            window.location.href = '/cart';
+        }
+    });
+
+    document.getElementById('custEmail').addEventListener('blur', async () => {
+        const email = document.getElementById('custEmail').value;
+        if (email) {
+            const res = await fetch('/api/recommendations', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+            const recs = await res.json();
+            const container = document.getElementById('recommendations');
+            container.innerHTML = renderProductGrid(recs);
+            attachCartButtons();
+        }
+    });
+</script>
+</body>
+</html>

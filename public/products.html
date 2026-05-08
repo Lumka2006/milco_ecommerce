@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MILCO Lesotho | Products</title>
+    <meta name="description" content="Browse all Made-in-Lesotho products.">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header>
+    <h1>MILCO Products</h1>
+    <nav>
+        <a href="/">Home</a> |
+        <a href="/products">Products</a> |
+        <a href="/newproducts">New Products</a> |
+        <a href="/stakeholders">Stakeholders</a> |
+        <a href="/contact">Contact</a>
+    </nav>
+    <hr>
+</header>
+
+<div class="cart-info">
+    🛒 Cart: <span id="cart-count">0</span> <a href="/cart">View Cart</a>
+</div>
+
+<section>
+    <h2>Our Available Products</h2>
+    <p>Browse our selection of proudly Made-in-Lesotho products.</p>
+    <div id="all-products" class="product-grid">Loading products...</div>
+</section>
+
+<footer>
+    <p><b>MILCO Lesotho</b> | Sefika Complex, Maseru | Contact: +266 5892 1648</p>
+</footer>
+
+<script src="/js/script.js"></script>
+<script>
+    fetch('/api/products')
+        .then(res => res.json())
+        .then(products => {
+            const container = document.getElementById('all-products');
+            container.innerHTML = renderProductGrid(products);
+            attachCartButtons();
+            updateCartCountDisplay();
+        });
+</script>
+</body>
+</html>
