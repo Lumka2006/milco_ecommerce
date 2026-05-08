@@ -106,6 +106,10 @@ function changeQty(index, amount) {
 
 function removeItem(index) {
 
+    if (!confirm(`Remove ${cart[index].name} from your cart?`)) {
+        return;
+    }
+
     cart.splice(index, 1);
 
     saveCart();
@@ -118,6 +122,15 @@ function removeItem(index) {
 // ==============================
 
 function clearCart() {
+
+    if (cart.length === 0) {
+        alert('Your cart is already empty.');
+        return;
+    }
+
+    if (!confirm('Clear all items from your cart?')) {
+        return;
+    }
 
     cart = [];
 
@@ -223,7 +236,23 @@ function renderCart() {
             totalEl.innerText = formatCurrency(0);
         }
 
+        const checkoutLink = document.getElementById('checkout-link');
+
+        if (checkoutLink) {
+            checkoutLink.classList.add('disabled-link');
+            checkoutLink.setAttribute('aria-disabled', 'true');
+            checkoutLink.addEventListener('click', stopEmptyCheckout);
+        }
+
         return;
+    }
+
+    const checkoutLink = document.getElementById('checkout-link');
+
+    if (checkoutLink) {
+        checkoutLink.classList.remove('disabled-link');
+        checkoutLink.removeAttribute('aria-disabled');
+        checkoutLink.removeEventListener('click', stopEmptyCheckout);
     }
 
     cart.forEach((item, index) => {
@@ -278,6 +307,20 @@ function renderCart() {
     }
 }
 
+function stopEmptyCheckout(event) {
+    event.preventDefault();
+    alert('Your cart is empty. Add products before checking out.');
+}
+
+function confirmCheckoutNavigation() {
+    if (cart.length === 0) {
+        alert('Your cart is empty. Add products before checking out.');
+        return false;
+    }
+
+    return confirm('Proceed to checkout with the items in your cart?');
+}
+
 // ==============================
 // CHECKOUT
 // ==============================
@@ -288,6 +331,10 @@ async function checkout(customerName, customerEmail, customerPhone, customerLoca
 
         alert('Cart is empty');
 
+        return false;
+    }
+
+    if (!confirm(`Place this order using ${paymentMethod}?`)) {
         return false;
     }
 

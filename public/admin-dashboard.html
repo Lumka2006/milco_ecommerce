@@ -60,6 +60,11 @@
         async function toggleNewProduct(id, isNewProduct) {
             const product = productsCache.find(p => p._id === id);
             if (!product) return;
+            const action = isNewProduct ? 'mark as new' : 'unmark as new';
+
+            if (!confirm(`Are you sure you want to ${action}: ${product.name}?`)) {
+                return;
+            }
 
             const formData = new FormData();
             formData.append('name', product.name);
@@ -80,6 +85,11 @@
         async function addProduct(event) {
             event.preventDefault();
             const form = event.target;
+            const name = form.elements.name.value;
+
+            if (!confirm(`Add ${name} to the product list?`)) {
+                return;
+            }
 
             await fetch('https://milco-backend.onrender.com/admin/api/products', {
                 method: 'POST',
@@ -88,6 +98,7 @@
             });
 
             form.reset();
+            alert('Product saved successfully.');
             loadData();
         }
 
