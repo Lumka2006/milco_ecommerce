@@ -9,7 +9,7 @@
 <body>
 <header>
     <h1>Checkout</h1>
-    <nav><a href="/cart">← Back to Cart</a></nav>
+    <nav><a href="/cart.html">← Back to Cart</a></nav>
 </header>
 
 <section>
@@ -52,14 +52,14 @@
         const success = await checkout(name, email, phone, location, paymentMethod);
         if (success) {
             localStorage.setItem('lastCustomerEmail', email);
-            window.location.href = '/cart';
+            window.location.href = '/cart.html';
         }
     });
 
     document.getElementById('custEmail').addEventListener('blur', async () => {
         const email = document.getElementById('custEmail').value;
         if (email) {
-            const res = await fetch('/api/recommendations', {
+            const res = await fetch('https://milco-backend.onrender.com/api/recommendations', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email })

@@ -5,11 +5,10 @@
     <link rel="stylesheet" href="/css/style.css">
     <script>
         let productsCache = [];
-
         async function loadData() {
-            const products = await fetch('/admin/api/products').then(r => r.json());
-            const orders = await fetch('/admin/api/orders').then(r => r.json());
-            const notif = await fetch('/admin/api/notifications').then(r => r.json());
+            const products = await fetch('https://milco-backend.onrender.com/admin/api/products', { credentials: 'include' }).then(r => r.json());
+            const orders = await fetch('https://milco-backend.onrender.com/admin/api/orders', { credentials: 'include' }).then(r => r.json());
+            const notif = await fetch('https://milco-backend.onrender.com/admin/api/notifications', { credentials: 'include' }).then(r => r.json());
             productsCache = products;
 
             document.getElementById('productCount').innerText = products.length;
@@ -50,7 +49,10 @@
 
         async function deleteProduct(id) {
             if (confirm('Delete product?')) {
-                await fetch(`/admin/api/products/${id}`, { method: 'DELETE' });
+                await fetch(`https://milco-backend.onrender.com/admin/api/products/${id}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
                 loadData();
             }
         }
@@ -67,9 +69,10 @@
             formData.append('description', product.description || '');
             formData.append('isNewProduct', String(isNewProduct));
 
-            await fetch(`/admin/api/products/${product._id}`, {
+            await fetch(`https://milco-backend.onrender.com/admin/api/products/${product._id}`, {
                 method: 'PUT',
-                body: formData
+                body: formData,
+                credentials: 'include'
             });
             loadData();
         }
@@ -78,9 +81,10 @@
             event.preventDefault();
             const form = event.target;
 
-            await fetch(form.action, {
+            await fetch('https://milco-backend.onrender.com/admin/api/products', {
                 method: 'POST',
-                body: new FormData(form)
+                body: new FormData(form),
+                credentials: 'include'
             });
 
             form.reset();
@@ -92,7 +96,7 @@
 </head>
 <body>
     <h1>Admin Dashboard</h1>
-    <nav><a href="/admin/logout">Logout</a></nav>
+    <nav><a href="https://milco-backend.onrender.com/admin/logout">Logout</a></nav>
     <div>
         <h2>Overview</h2>
         <p>Products: <span id="productCount"></span></p>
@@ -104,7 +108,7 @@
         <h2>Products</h2>
         <div id="productList"></div>
         <h3>Add Product</h3>
-        <form action="/admin/api/products" method="POST" enctype="multipart/form-data" onsubmit="addProduct(event)">
+        <form action="https://milco-backend.onrender.com/admin/api/products" method="POST" enctype="multipart/form-data" onsubmit="addProduct(event)">
             <input name="name" placeholder="Name" required><br>
             <input name="price" type="number" placeholder="Price" required><br>
             <input name="stock" type="number" placeholder="Stock" required><br>

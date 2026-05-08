@@ -16,11 +16,11 @@
     <h1>Welcome to MILCO Lesotho</h1>
     <p>Made In Lesotho Cooperative - Supporting Local Products</p>
     <nav>
-        <a href="/">Home</a> |
-        <a href="/products">Products</a> |
-        <a href="/newproducts">New Products</a> |
-        <a href="/stakeholders">Stakeholders</a> |
-        <a href="/contact">Contact</a>
+        <a href="/index.html">Home</a> |
+        <a href="/products.html">Products</a> |
+        <a href="/newproducts.html">New Products</a> |
+        <a href="/stakeholders.html">Stakeholders</a> |
+        <a href="/contact.html">Contact</a>
     </nav>
     <hr>
 </header>
@@ -30,7 +30,7 @@
     <div class="banner-content">
         <h2>🔥 New Products Have Arrived!</h2>
         <p>Discover exciting Made in Lesotho products and subscribe for updates.</p>
-        <a href="/newproducts" class="btn">Click Here to View New Products →</a>
+        <a href="/newproducts.html" class="btn">Click Here to View New Products →</a>
     </div>
     <div class="banner-ticker" aria-label="MILCO highlights">
         <div class="banner-track">
@@ -68,7 +68,7 @@
 <script src="/js/script.js"></script>
 <script>
     // Load featured products
-    fetch('/api/products')
+    fetch('https://milco-backend.onrender.com/api/products')
         .then(res => res.json())
         .then(products => {
             const featured = products.slice(0, 4);
@@ -79,7 +79,7 @@
     // Load recommendations if user has purchased before (from localStorage email)
     const lastCustomerEmail = localStorage.getItem('lastCustomerEmail');
     if (lastCustomerEmail) {
-        fetch('/api/recommendations', {
+        fetch('https://milco-backend.onrender.com/api/recommendations', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: lastCustomerEmail })

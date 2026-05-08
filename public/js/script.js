@@ -180,7 +180,7 @@ async function loadProducts() {
 
     try {
 
-        const response = await fetch('/api/products');
+        const response = await fetch('https://milco-backend.onrender.com/api/products');
 
         const products = await response.json();
 
@@ -293,7 +293,7 @@ async function checkout(customerName, customerEmail, customerPhone, customerLoca
 
     try {
 
-        const response = await fetch('/api/checkout', {
+        const response = await fetch('https://milco-backend.onrender.com/api/checkout', {
 
             method: 'POST',
 
@@ -357,7 +357,7 @@ async function loadRecommendations(email) {
 
     try {
 
-        const response = await fetch('/api/recommendations', {
+        const response = await fetch('https://milco-backend.onrender.com/api/recommendations', {
 
             method: 'POST',
 
@@ -446,7 +446,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (window.location.pathname.includes('/newproducts')) {
 
-        fetch('/api/new-products')
+        fetch('https://milco-backend.onrender.com/api/new-products')
 
             .then(res => res.json())
 
@@ -510,7 +510,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
 
-                const response = await fetch('/api/subscribe', {
+                const response = await fetch('https://milco-backend.onrender.com/api/subscribe', {
 
                     method: 'POST',
 
