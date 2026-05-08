@@ -35,15 +35,5 @@
 </footer>
 
 <script src="/js/script.js"></script>
-<script>
-    fetch('https://milco-backend.onrender.com/api/products')
-        .then(res => res.json())
-        .then(products => {
-            const container = document.getElementById('all-products');
-            container.innerHTML = renderProductGrid(products);
-            attachCartButtons();
-            updateCartCountDisplay();
-        });
-</script>
 </body>
 </html>

@@ -13,6 +13,12 @@
 </header>
 
 <section>
+    <h2>Order Summary</h2>
+    <div id="checkout-items"></div>
+    <h3>Total: <span id="checkout-total">M0.00</span></h3>
+</section>
+
+<section>
     <h2>Your Details</h2>
     <form id="checkoutForm">
         <label>Full Name:</label><br>
@@ -31,7 +37,7 @@
             <option value="Card Payment">Card Payment</option>
             <option value="Bank Transfer">Bank Transfer</option>
         </select><br><br>
-        <button type="submit" class="btn">Place Order</button>
+        <button type="submit" class="btn" id="placeOrderBtn">Place Order</button>
     </form>
 </section>
 
@@ -42,8 +48,35 @@
 
 <script src="/js/script.js"></script>
 <script>
+    function renderCheckoutSummary() {
+        const container = document.getElementById('checkout-items');
+        const totalEl = document.getElementById('checkout-total');
+        const button = document.getElementById('placeOrderBtn');
+
+        if (cart.length === 0) {
+            container.innerHTML = '<p>Your cart is empty. Add products before checking out.</p>';
+            totalEl.innerText = formatCurrency(0);
+            button.disabled = true;
+            return;
+        }
+
+        let total = 0;
+        container.innerHTML = cart.map(item => {
+            const itemTotal = Number(item.price) * Number(item.quantity);
+            total += itemTotal;
+            return `<p><b>${item.name}</b> x ${item.quantity} - ${formatCurrency(itemTotal)}</p>`;
+        }).join('');
+
+        totalEl.innerText = formatCurrency(total);
+        button.disabled = false;
+    }
+
     document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
         e.preventDefault();
+        const button = document.getElementById('placeOrderBtn');
+        button.disabled = true;
+        button.innerText = 'Placing Order...';
+
         const name = document.getElementById('custName').value;
         const email = document.getElementById('custEmail').value;
         const phone = document.getElementById('custPhone').value;
@@ -53,6 +86,9 @@
         if (success) {
             localStorage.setItem('lastCustomerEmail', email);
             window.location.href = '/cart.html';
+        } else {
+            button.disabled = false;
+            button.innerText = 'Place Order';
         }
     });
 
@@ -70,6 +106,8 @@
             attachCartButtons();
         }
     });
+
+    renderCheckoutSummary();
 </script>
 </body>
 </html>

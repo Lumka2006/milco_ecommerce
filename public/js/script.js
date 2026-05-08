@@ -293,6 +293,18 @@ async function checkout(customerName, customerEmail, customerPhone, customerLoca
 
     try {
 
+        const checkoutItems = cart.map(item => ({
+            productId: item.productId || item.id || item._id,
+            name: item.name,
+            price: Number(item.price),
+            quantity: Number(item.quantity)
+        }));
+
+        if (checkoutItems.some(item => !item.productId || item.quantity <= 0)) {
+            alert('One or more cart items are invalid. Please remove them and add them again.');
+            return false;
+        }
+
         const response = await fetch('https://milco-backend.onrender.com/api/checkout', {
 
             method: 'POST',
@@ -312,13 +324,16 @@ async function checkout(customerName, customerEmail, customerPhone, customerLoca
 
                 paymentMethod,
 
-                items: cart
+                items: checkoutItems
 
             })
 
         });
 
-        const data = await response.json();
+        const data = await response.json().catch(() => ({
+            success: false,
+            message: 'Checkout server returned an invalid response'
+        }));
 
         if (data.success) {
 
@@ -334,7 +349,7 @@ async function checkout(customerName, customerEmail, customerPhone, customerLoca
 
         } else {
 
-            alert(data.message);
+            alert(data.message || 'Checkout failed');
 
             return false;
         }

@@ -5,6 +5,7 @@ const Order = require('../models/Order');
 const Subscriber = require('../models/Subscriber');
 const CustomerBehavior = require('../models/CustomerBehavior');
 const nodemailer = require('nodemailer');
+const mongoose = require('mongoose');
 
 // Email setup
 const transporter = nodemailer.createTransport({
@@ -55,23 +56,34 @@ router.post('/checkout', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Cart is empty' });
     }
 
+    const orderItems = items.map(item => ({
+      productId: item.productId || item.id || item._id,
+      name: item.name,
+      price: Number(item.price),
+      quantity: Number(item.quantity)
+    }));
+
+    if (orderItems.some(item => !mongoose.Types.ObjectId.isValid(item.productId) || item.quantity <= 0)) {
+      return res.status(400).json({ success: false, message: 'One or more cart items are invalid. Please add them again.' });
+    }
+
     // Check stock
-    for (let item of items) {
+    for (let item of orderItems) {
       const product = await Product.findById(item.productId);
       if (!product || product.stock < item.quantity) {
-        return res.status(400).json({ success: false, message: `Insufficient stock for ${product?.name}` });
+        return res.status(400).json({ success: false, message: `Insufficient stock for ${product?.name || item.name || 'an item'}` });
       }
     }
     // Reduce stock
-    for (let item of items) {
+    for (let item of orderItems) {
       await Product.findByIdAndUpdate(item.productId, { $inc: { stock: -item.quantity } });
     }
     // Save order
     const order = new Order({
       customer,
-      items,
+      items: orderItems,
       paymentMethod,
-      total: items.reduce((sum, i) => sum + (i.price * i.quantity), 0)
+      total: orderItems.reduce((sum, i) => sum + (i.price * i.quantity), 0)
     });
     await order.save();
 
@@ -80,7 +92,7 @@ router.post('/checkout', async (req, res) => {
     if (!behavior) {
       behavior = new CustomerBehavior({ email: customer.email, purchasedCategories: [], viewedProducts: [] });
     }
-    for (let item of items) {
+    for (let item of orderItems) {
       const prod = await Product.findById(item.productId);
       if (prod && !behavior.purchasedCategories.includes(prod.category)) {
         behavior.purchasedCategories.push(prod.category);
